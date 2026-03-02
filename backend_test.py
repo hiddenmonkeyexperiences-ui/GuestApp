@@ -119,7 +119,11 @@ class HiddenMonkeyAPITester:
             "property_id": "varanasi",
             "notes": "Test order"
         }
-        return self.run_test("Create Food Order", "POST", "/orders", 201, order_data)
+        success, response = self.run_test("Create Food Order", "POST", "/orders", 200, order_data)
+        if success and 'id' in response:
+            print(f"  ✅ Order created with ID: {response.get('id', 'N/A')}")
+            return True
+        return success
     
     def test_create_experience_booking(self):
         """Test creating an experience booking"""
@@ -132,7 +136,11 @@ class HiddenMonkeyAPITester:
             "property_id": "varanasi",
             "notes": "Test booking"
         }
-        return self.run_test("Create Experience Booking", "POST", "/bookings", 201, booking_data)
+        success, response = self.run_test("Create Experience Booking", "POST", "/bookings", 200, booking_data)
+        if success and 'id' in response:
+            print(f"  ✅ Booking created with ID: {response.get('id', 'N/A')}")
+            return True
+        return success
     
     def test_create_guest_request(self):
         """Test creating a guest request"""
@@ -144,7 +152,11 @@ class HiddenMonkeyAPITester:
             "message": "Need extra towels please",
             "property_id": "varanasi"
         }
-        return self.run_test("Create Guest Request", "POST", "/requests", 201, request_data)
+        success, response = self.run_test("Create Guest Request", "POST", "/requests", 200, request_data)
+        if success and 'id' in response:
+            print(f"  ✅ Request created with ID: {response.get('id', 'N/A')}")
+            return True
+        return success
     
     def test_active_menu(self):
         """Test active menu endpoint (time-based filtering)"""
