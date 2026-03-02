@@ -1,34 +1,259 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* Hidden Monkey Stays - Brand Styles */
+
+/* Remove default center alignment */
+.App {
+  min-height: 100vh;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Category Pills */
+.category-pill {
+  @apply px-6 py-2 rounded-full border border-[#E8E4D9] bg-transparent text-[#2D3436]/80 cursor-pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.category-pill:hover {
+  @apply bg-[#F4A261] text-white border-[#F4A261];
 }
 
-.App-link {
-    color: #61dafb;
+.category-pill.active {
+  @apply bg-[#0D7377] text-white border-[#0D7377];
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* Floating Dock - Mobile Navigation */
+.floating-dock {
+  @apply fixed bottom-6 left-6 right-6 p-2 rounded-full flex justify-around items-center z-50;
+  background: linear-gradient(135deg, #0D7377 0%, #14919B 100%);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 20px 50px rgba(13, 115, 119, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dock-item {
+  @apply flex flex-col items-center gap-1 py-2 px-4 rounded-full text-white/80;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.dock-item:hover,
+.dock-item.active {
+  @apply text-[#F4A261] bg-white/15;
+}
+
+/* Guest Card */
+.guest-card {
+  @apply bg-white rounded-3xl overflow-hidden border border-[#E8E4D9]/50;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.guest-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(13, 115, 119, 0.1);
+}
+
+/* Page Header */
+.page-header {
+  @apply pt-8 pb-12 px-6;
+}
+
+.page-header h1 {
+  font-family: "Quicksand", "DM Serif Display", Georgia, serif;
+  @apply text-4xl text-[#0D7377] mb-2 font-bold;
+}
+
+.page-header p {
+  @apply text-[#636E72] text-lg;
+}
+
+/* Admin Sidebar */
+.admin-sidebar {
+  @apply w-64 min-h-screen p-6;
+  background: linear-gradient(180deg, #0D7377 0%, #095B5E 100%);
+}
+
+.admin-nav-item {
+  @apply flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 mb-2;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.admin-nav-item:hover,
+.admin-nav-item.active {
+  @apply bg-white/15 text-white;
+}
+
+/* Status Badges */
+.status-badge {
+  @apply px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider;
+}
+
+.status-pending {
+  @apply bg-[#F4A261]/20 text-[#E76F51];
+}
+
+.status-approved {
+  @apply bg-[#0D7377]/20 text-[#0D7377];
+}
+
+.status-in_progress,
+.status-preparing {
+  @apply bg-[#6BB8B2]/20 text-[#14919B];
+}
+
+.status-paid {
+  @apply bg-[#00B894]/20 text-[#00B894];
+}
+
+.status-completed,
+.status-delivered {
+  @apply bg-[#00B894]/15 text-[#00B894];
+}
+
+.status-rejected {
+  @apply bg-[#D63031]/15 text-[#D63031];
+}
+
+/* Cart Badge */
+.cart-badge {
+  @apply absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#E76F51] text-white text-xs flex items-center justify-center font-semibold;
+}
+
+/* Form Inputs */
+.hm-input {
+  @apply w-full px-4 py-3 rounded-xl border border-[#E8E4D9] bg-white text-[#2D3436] placeholder-[#636E72]/50;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hm-input:focus {
+  @apply outline-none border-[#0D7377] ring-2 ring-[#0D7377]/20;
+}
+
+/* Primary Button */
+.btn-primary {
+  @apply px-6 py-3 rounded-xl bg-[#0D7377] text-white font-semibold;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-primary:hover {
+  @apply bg-[#095B5E];
+}
+
+.btn-primary:active {
+  transform: scale(0.95);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  @apply px-6 py-3 rounded-xl bg-[#F4A261] text-white font-semibold;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-secondary:hover {
+  @apply bg-[#E76F51];
+}
+
+/* Accent Button */
+.btn-accent {
+  @apply px-6 py-3 rounded-xl bg-[#E76F51] text-white font-semibold;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-accent:hover {
+  @apply bg-[#D55A3F];
+}
+
+/* Destructive Button */
+.btn-destructive {
+  @apply px-6 py-3 rounded-xl bg-[#D63031] text-white font-semibold;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-destructive:hover {
+  @apply bg-[#B52728];
+}
+
+/* Mobile-first responsive adjustments */
+@media (max-width: 768px) {
+  .page-header {
+    @apply pt-6 pb-8 px-4;
+  }
+  
+  .page-header h1 {
+    @apply text-3xl;
+  }
+  
+  .floating-dock {
+    @apply left-4 right-4 bottom-4;
+  }
+}
+
+/* Admin table styles */
+.admin-table {
+  @apply w-full;
+}
+
+.admin-table th {
+  @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#636E72] bg-[#F5F0E8];
+}
+
+.admin-table td {
+  @apply px-4 py-4 border-b border-[#E8E4D9];
+}
+
+.admin-table tr:hover td {
+  @apply bg-[#FBF9F6];
+}
+
+/* WhatsApp Button */
+.whatsapp-btn {
+  @apply inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#25D366] text-white font-semibold;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.whatsapp-btn:hover {
+  @apply bg-[#20bd5a];
+}
+
+.whatsapp-btn:active {
+  transform: scale(0.95);
+}
+
+/* Brand Logo Animation */
+.brand-logo {
+  transition: transform 0.3s ease;
+}
+
+.brand-logo:hover {
+  transform: scale(1.05);
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(135deg, #0D7377 0%, #14919B 50%, #6BB8B2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Mascot Float Animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.mascot-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Hidden Monkey Card Gradient */
+.hm-card-gradient {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F5F0E8 100%);
+}
+
+/* Teal Gradient Background */
+.hm-gradient-bg {
+  background: linear-gradient(135deg, #0D7377 0%, #14919B 50%, #6BB8B2 100%);
+}
+
+/* Warm Gradient Background */
+.hm-warm-gradient {
+  background: linear-gradient(135deg, #E76F51 0%, #F4A261 100%);
 }
