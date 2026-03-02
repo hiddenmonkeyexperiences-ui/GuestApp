@@ -1,146 +1,142 @@
-# Hidden Monkey Stays - Guest Portal
+# Hidden Monkey Stays - Guest Portal PRD
 
 ## Project Overview
-A hospitality guest portal for Hidden Monkey Stays properties (Varanasi, Darjeeling) with food ordering, experience booking, and guest request management.
+A hospitality guest portal for Hidden Monkey Stays (hostel/homestay chain). Guests scan QR codes to access property info, order food, book experiences, and make requests.
 
 ## Tech Stack
-- **Frontend**: React 18 + TailwindCSS + Shadcn/UI
-- **Backend**: FastAPI (Python 3.11)
-- **Database**: MongoDB Atlas (cloud)
-- **Notifications**: Twilio WhatsApp (sandbox)
-- **Payments**: Razorpay (test mode)
+- **Backend**: FastAPI + Python
+- **Frontend**: React 19 + Tailwind CSS + shadcn/ui
+- **Database**: MongoDB Atlas
+- **Integrations**: Twilio (WhatsApp), Razorpay (Payments), Cloudinary (Images)
 
-## What's Been Implemented
+## Core Features Implemented
 
-### March 2026 Session
+### Guest Features
+- ✅ QR-based property access (/VaranasiHostel, /DarjeelingHostel, /DarjeelingHome)
+- ✅ Property info (check-in/out times, WiFi, events)
+- ✅ Food ordering with cart
+- ✅ Experience bookings
+- ✅ Guest requests (housekeeping, maintenance, amenities)
+- ✅ WhatsApp notifications
 
-#### 1. Reports Enhancement
-- Unit-level item entries (2 pieces = 2 rows)
-- Net sales summary card
-- Top 3 best selling items with revenue
-- Download options: Summary, Orders, Unit Sales, Top Items
+### Admin Features
+- ✅ Multi-property management
+- ✅ Menu management with multi-category support
+- ✅ Category timing controls
+- ✅ Experience management
+- ✅ Staff user management
+- ✅ QR code generation
+- ✅ Order/booking/request logs
+- ✅ Message template customization
 
-#### 2. MongoDB Atlas Integration
-- Switched from local MongoDB to Atlas
-- Data persisted: 3 properties, 36 menu items, 18 experiences, users
-
-#### 3. MongoDB Connection Pooling (Production-Ready)
-- FastAPI lifespan context manager for startup/shutdown
-- Connection pool: 10-50 connections
-- Proper async Motor driver usage
-- Health check endpoint: `/api/health`
-
-#### 4. Network Hardening (Frontend)
-- 8-second API request timeout
-- Network error interceptor with "Poor Network Connection" toast
-- Cart persists to localStorage (survives browser refresh/crash)
-- Pending order recovery (savePendingOrder/getPendingOrder)
-- Network error banners with retry buttons
-
-#### 5. Webhook Security (Production-Ready)
-- Razorpay: HMAC-SHA256 signature verification using `X-Razorpay-Signature` header
-- Twilio: RequestValidator signature verification using `X-Twilio-Signature` header
-- Unauthorized requests rejected with 401 status code
-- Signatures verified before processing any webhook payload
-
-#### 6. Input Validation & Sanitization
-- Guest name: alphanumeric + basic punctuation, 2-100 chars
-- Room number: alphanumeric, 1-20 chars
-- Phone/WhatsApp: 7-15 digits with formatting
-- Notes: XSS, SQL injection, NoSQL injection patterns blocked
-- HTML escaped on all user inputs
-- Pydantic validators on all guest-facing models
-
-#### 7. React Error Boundary
-- Global ErrorBoundary wrapping entire app
-- Graceful fallback UI instead of white screen
-- "Try Again", "Go Home", "Reload" options
-- Error logging for debugging
-
-#### 8. Experience Booking Workflow (NEW)
-- Guest books → Staff2 (Manager) notified to approve/reject
-- Guest receives "team will connect" message
-- On approval → Guest receives Razorpay payment link
-- On payment → Both Staff2 and Guest receive confirmation
-- Staff2 can mark as scheduled after coordinating
-
-#### 9. Service Request Workflow (NEW)
-- Guest raises request → Staff2 notified, Guest gets acknowledgment
-- Staff2 acknowledges → Guest notified
-- Staff2 resolves → Guest notified of resolution
-
-#### 10. Feature Toggles (NEW)
-- Admin can enable/disable Experiences feature
-- Admin can enable/disable Requests feature
-- Hidden from guest UI when disabled
-
-#### 11. Configurable Message Templates
-- 12 message templates fully customizable per property
-- Default templates populated automatically
-- Admin UI at `/admin/message-templates`
-- Variable placeholders: `{guest_name}`, `{order_id}`, `{property_name}`, etc.
-
-## Core Requirements
-- Guest portal for hostel/homestay properties
-- QR code-based access
-- Food ordering with WhatsApp notifications
-- Experience booking
-- Guest request management (housekeeping, maintenance)
-- Staff dashboard with order management
-- Admin panel for property configuration
+### Staff Features
+- ✅ Staff login per property
+- ✅ Order management dashboard
+- ✅ WhatsApp workflow integration
 
 ## User Personas
-1. **Guest**: Scans QR, orders food, books experiences, submits requests
-2. **Staff**: Manages orders, responds via WhatsApp
-3. **Admin**: Configures menu, experiences, properties, staff
+
+### Guest
+- Hotel/hostel guests who scan QR codes
+- No login required
+- Access property info, order food, book experiences
+
+### Staff
+- Kitchen staff: Receives food orders
+- Managers: Receives all notifications, manages bookings
+
+### Admin
+- Full control over all properties
+- Configure settings, manage staff, view reports
+
+## Properties
+1. Hidden Monkey Hostel, Varanasi (`/VaranasiHostel`)
+2. Hidden Monkey Hostel, Darjeeling (`/DarjeelingHostel`)
+3. Hidden Monkey Home, Darjeeling (`/DarjeelingHome`)
+
+## What's Been Implemented (March 2026)
+
+### Backend
+- All CRUD APIs for menu, experiences, orders, bookings, requests
+- MongoDB Atlas integration with connection pooling
+- Twilio WhatsApp integration
+- Razorpay payment integration
+- Cloudinary image upload
+- Input validation and sanitization
+- OTP-based password reset
+
+### Frontend
+- Complete guest portal UI
+- Admin dashboard with all management pages
+- Staff dashboard
+- Responsive design
+- Cart functionality
+
+### Deployment Preparation
+- Removed Emergent-specific code from index.html
+- Removed visual-edit plugins
+- Created Railway deployment configuration
+- Updated requirements.txt with all dependencies
+
+## Environment Variables
+
+### Backend
+- MONGO_URL, DB_NAME (required)
+- BACKEND_URL (required for QR codes)
+- ADMIN_PASSWORD, ADMIN_SECRET_KEY
+- TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_NUMBER
+- RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
+- CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
+- CORS_ORIGINS
+
+### Frontend
+- REACT_APP_BACKEND_URL (required)
 
 ## Prioritized Backlog
 
-### P0 (Critical)
-- [x] MongoDB Atlas connection
-- [x] Connection pooling
-- [x] Network error handling
-- [x] Cart persistence
+### P0 - Critical
+- None (app is production-ready)
 
-### P1 (Important)
-- [ ] Twilio WhatsApp production setup (currently sandbox)
-- [ ] Razorpay live mode activation
-- [ ] Custom domain configuration
+### P1 - High Priority
+- [ ] Production Twilio WhatsApp number (currently sandbox)
+- [ ] Production Razorpay credentials
+- [ ] Cloudinary setup for image uploads
 
-### P2 (Nice to Have)
-- [ ] Date range filters for reports
-- [ ] Push notifications
+### P2 - Medium Priority
+- [ ] Email notifications backup (Resend already integrated)
+- [ ] Analytics dashboard
+- [ ] Guest feedback system
+
+### P3 - Future Enhancements
 - [ ] Multi-language support
-- [ ] Offline mode support
+- [ ] Push notifications
+- [ ] Loyalty/rewards program
+- [ ] Integration with PMS systems
 
-## Deployment
-
-### Recommended: Railway ($5/month)
-- No cold starts
-- Native Python/FastAPI support
-- Both services in one dashboard
-
-### Environment Variables
-See `DEPLOYMENT_GUIDE.md` for complete list
+## Next Steps
+1. Deploy to Railway using RAILWAY_DEPLOYMENT.md
+2. Configure custom domain
+3. Set up production Twilio WhatsApp
+4. Complete Razorpay KYC for live payments
+5. Set up Cloudinary for image uploads
 
 ## Files Structure
 ```
-/app/
+/app
 ├── backend/
-│   ├── server.py      # FastAPI app with MongoDB pooling
-│   ├── requirements.txt
-│   └── .env
+│   ├── server.py        # All API endpoints (~2300 lines)
+│   ├── requirements.txt # Python dependencies
+│   ├── railway.toml     # Railway config
+│   └── .env             # Environment variables
 ├── frontend/
 │   ├── src/
-│   │   ├── lib/
-│   │   │   ├── api.js    # Axios with 8s timeout
-│   │   │   └── store.js  # Cart persistence
-│   │   └── pages/
-│   └── .env
-├── render.yaml        # One-click Render deploy
-└── DEPLOYMENT_GUIDE.md
+│   │   ├── App.js       # Routes
+│   │   ├── pages/       # All pages
+│   │   ├── components/  # UI components
+│   │   └── lib/         # API client, store
+│   ├── public/          # Static files
+│   ├── railway.toml     # Railway config
+│   └── package.json     # Node dependencies
+├── RAILWAY_DEPLOYMENT.md # Deployment guide
+└── memory/PRD.md        # This file
 ```
-
-## Testing
-- Backend: 100% passed
-- Frontend: 90% passed (network hardening verified)
