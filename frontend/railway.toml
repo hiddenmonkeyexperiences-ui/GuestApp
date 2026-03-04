@@ -1,6 +1,8 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "yarn install && yarn build"
+
+[build.nixpacks]
+nixPkgs = ["nodejs_20"]
 
 [deploy]
 startCommand = "npx serve -s build -l $PORT"
