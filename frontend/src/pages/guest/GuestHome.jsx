@@ -153,7 +153,7 @@ export default function GuestHome() {
               <img 
                 src={mascotBase64}
                 alt="Hidden Monkey" 
-                className="w-28 h-28 md:w-32 md:h-32 object-contain mascot-float drop-shadow-lg"
+                className="w-32 h-32 md:w-40 md:h-40 object-contain mascot-float drop-shadow-lg"
               />
             </div>
             
@@ -180,20 +180,20 @@ export default function GuestHome() {
           <div className="px-4 md:px-8 -mt-4 relative z-20 mb-4">
             <button
               onClick={() => navigate(`/${getPropertySlug()}/checkin`)}
-              className="w-full bg-gradient-to-r from-[#FFC107] to-[#F9A825] rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full bg-gradient-to-r from-[#FFC107] to-[#F9A825] rounded-2xl p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               data-testid="checkin-banner"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                    <ClipboardCheck className="w-6 h-6 text-white" />
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                    <ClipboardCheck className="w-5 h-5 text-white" />
                   </div>
                   <div className="text-left">
-                    <h3 className="text-white font-bold text-lg">Complete Your Check-in</h3>
-                    <p className="text-white/80 text-sm">Quick & easy registration</p>
+                    <h3 className="text-white font-bold text-base">Complete Your Check-in</h3>
+                    <p className="text-white/80 text-xs">Quick & easy registration</p>
                   </div>
                 </div>
-                <ChevronRight className="w-6 h-6 text-white" />
+                <ChevronRight className="w-5 h-5 text-white" />
               </div>
             </button>
           </div>
