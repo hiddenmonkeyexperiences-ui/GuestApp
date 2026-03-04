@@ -217,6 +217,52 @@ app = FastAPI(lifespan=lifespan)
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# ==================== Exception Handlers ====================
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(ValidationError)
+async def pydantic_validation_exception_handler(request: Request, exc: ValidationError):
+    """Handle Pydantic validation errors gracefully"""
+    errors = exc.errors()
+    # Extract user-friendly error messages
+    error_messages = []
+    for error in errors:
+        field = ".".join(str(loc) for loc in error.get("loc", []))
+        msg = error.get("msg", "Validation error")
+        error_messages.append(f"{field}: {msg}")
+    
+    logging.warning(f"Validation error: {error_messages}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": error_messages, "type": "validation_error"}
+    )
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle FastAPI request validation errors"""
+    errors = exc.errors()
+    error_messages = []
+    for error in errors:
+        field = ".".join(str(loc) for loc in error.get("loc", []))
+        msg = error.get("msg", "Validation error")
+        error_messages.append(f"{field}: {msg}")
+    
+    logging.warning(f"Request validation error: {error_messages}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": error_messages, "type": "validation_error"}
+    )
+
+@app.exception_handler(ValueError)
+async def value_error_exception_handler(request: Request, exc: ValueError):
+    """Handle ValueError from validators as 422 errors"""
+    logging.warning(f"Value error: {str(exc)}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": str(exc), "type": "validation_error"}
+    )
+
 # ==================== Input Validation & Sanitization ====================
 
 def render_message_template(template: str, variables: dict) -> str:
@@ -245,16 +291,31 @@ class InputValidator:
     ROOM_PATTERN = re.compile(r'^[A-Za-z0-9\-\s]{1,20}$')
     NAME_PATTERN = re.compile(r'^[A-Za-z\s\.\'\-]{2,100}$')
     
-    # Dangerous patterns to block
-    SCRIPT_PATTERN = re.compile(r'<script|javascript:|on\w+\s*=', re.IGNORECASE)
-    SQL_INJECTION_PATTERN = re.compile(r'(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER)\b.*\b(FROM|INTO|SET|TABLE)\b)', re.IGNORECASE)
-    NOSQL_INJECTION_PATTERN = re.compile(r'\$\w+|\{\s*\$', re.IGNORECASE)
+    # Dangerous patterns to block - more comprehensive
+    SCRIPT_PATTERN = re.compile(r'<script|javascript:|on\w+\s*=|<\s*img|<\s*iframe', re.IGNORECASE)
+    SQL_INJECTION_PATTERN = re.compile(
+        r"('|\")?\s*(--|#|;|/\*|\*/)|"  # Comment patterns
+        r"(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|EXEC|EXECUTE)\b)|"  # SQL keywords
+        r"(\bOR\b\s+\d+\s*=\s*\d+)|"  # OR 1=1 patterns
+        r"(\bAND\b\s+\d+\s*=\s*\d+)",  # AND 1=1 patterns
+        re.IGNORECASE
+    )
+    NOSQL_INJECTION_PATTERN = re.compile(r'\$\w+|\{\s*\$|\$where|\$regex|\$gt|\$lt|\$ne|\$eq', re.IGNORECASE)
+    
+    # Max input lengths (reject if exceeded)
+    MAX_NAME_LENGTH = 100
+    MAX_ROOM_LENGTH = 20
+    MAX_NOTES_LENGTH = 1000
+    MAX_PROPERTY_ID_LENGTH = 50
     
     @staticmethod
     def sanitize_string(value: str, max_length: int = 500) -> str:
         """Sanitize a string input - escape HTML and trim"""
         if not value:
             return ""
+        # Reject if too long (before processing)
+        if len(value) > max_length * 2:
+            raise ValueError(f"Input exceeds maximum length of {max_length}")
         # Trim whitespace and limit length
         value = value.strip()[:max_length]
         # Escape HTML entities to prevent XSS
@@ -262,11 +323,23 @@ class InputValidator:
         return value
     
     @staticmethod
+    def check_injection_patterns(value: str) -> None:
+        """Check for SQL/NoSQL injection patterns BEFORE any escaping"""
+        if InputValidator.SQL_INJECTION_PATTERN.search(value):
+            raise ValueError("Invalid content detected - potential injection attempt")
+        if InputValidator.NOSQL_INJECTION_PATTERN.search(value):
+            raise ValueError("Invalid content detected - potential injection attempt")
+        if InputValidator.SCRIPT_PATTERN.search(value):
+            raise ValueError("Invalid content detected - potential XSS attempt")
+    
+    @staticmethod
     def validate_phone(phone: str) -> str:
         """Validate and sanitize phone number"""
         if not phone:
             raise ValueError("Phone number is required")
         phone = phone.strip()
+        # Check for injection first
+        InputValidator.check_injection_patterns(phone)
         # Remove common formatting but keep digits and +
         cleaned = re.sub(r'[^\d\+]', '', phone)
         if len(cleaned) < 7 or len(cleaned) > 15:
@@ -280,7 +353,12 @@ class InputValidator:
         """Validate room number"""
         if not room:
             raise ValueError("Room number is required")
-        room = room.strip()[:20]
+        # Reject if too long
+        if len(room) > InputValidator.MAX_ROOM_LENGTH * 2:
+            raise ValueError(f"Room number exceeds maximum length")
+        room = room.strip()[:InputValidator.MAX_ROOM_LENGTH]
+        # Check for injection first
+        InputValidator.check_injection_patterns(room)
         if not InputValidator.ROOM_PATTERN.match(room):
             raise ValueError("Invalid room number format")
         return html.escape(room)
@@ -290,9 +368,14 @@ class InputValidator:
         """Validate guest name"""
         if not name:
             raise ValueError("Guest name is required")
-        name = name.strip()[:100]
+        # Reject if too long
+        if len(name) > InputValidator.MAX_NAME_LENGTH * 2:
+            raise ValueError(f"Name exceeds maximum length")
+        name = name.strip()[:InputValidator.MAX_NAME_LENGTH]
         if len(name) < 2:
             raise ValueError("Name must be at least 2 characters")
+        # Check for injection BEFORE pattern matching
+        InputValidator.check_injection_patterns(name)
         if not InputValidator.NAME_PATTERN.match(name):
             raise ValueError("Name contains invalid characters")
         return html.escape(name)
@@ -302,14 +385,12 @@ class InputValidator:
         """Validate and sanitize notes/messages"""
         if not notes:
             return ""
-        notes = notes.strip()[:1000]
-        # Check for injection attempts
-        if InputValidator.SCRIPT_PATTERN.search(notes):
-            raise ValueError("Invalid content detected")
-        if InputValidator.SQL_INJECTION_PATTERN.search(notes):
-            raise ValueError("Invalid content detected")
-        if InputValidator.NOSQL_INJECTION_PATTERN.search(notes):
-            raise ValueError("Invalid content detected")
+        # Reject if too long
+        if len(notes) > InputValidator.MAX_NOTES_LENGTH * 2:
+            raise ValueError(f"Notes exceed maximum length")
+        notes = notes.strip()[:InputValidator.MAX_NOTES_LENGTH]
+        # Check for injection patterns
+        InputValidator.check_injection_patterns(notes)
         return html.escape(notes)
     
     @staticmethod
@@ -317,7 +398,12 @@ class InputValidator:
         """Validate property ID"""
         if not property_id:
             raise ValueError("Property ID is required")
-        property_id = property_id.strip()[:50]
+        # Reject if too long
+        if len(property_id) > InputValidator.MAX_PROPERTY_ID_LENGTH * 2:
+            raise ValueError(f"Property ID exceeds maximum length")
+        property_id = property_id.strip()[:InputValidator.MAX_PROPERTY_ID_LENGTH]
+        # Check for injection first
+        InputValidator.check_injection_patterns(property_id)
         # Only allow alphanumeric and hyphens
         if not re.match(r'^[a-zA-Z0-9\-_]+$', property_id):
             raise ValueError("Invalid property ID format")
