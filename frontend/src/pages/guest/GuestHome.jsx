@@ -153,7 +153,7 @@ export default function GuestHome() {
               <img 
                 src={mascotBase64}
                 alt="Hidden Monkey" 
-                className="w-20 h-20 md:w-24 md:h-24 object-contain mascot-float drop-shadow-lg"
+                className="w-28 h-28 md:w-32 md:h-32 object-contain mascot-float drop-shadow-lg"
               />
             </div>
             
