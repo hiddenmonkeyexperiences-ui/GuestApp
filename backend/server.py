@@ -340,6 +340,9 @@ class InputValidator:
         phone = phone.strip()
         # Check for injection first
         InputValidator.check_injection_patterns(phone)
+        # Reject double plus signs or other invalid patterns
+        if '++' in phone or phone.count('+') > 1:
+            raise ValueError("Invalid phone number format")
         # Remove common formatting but keep digits and +
         cleaned = re.sub(r'[^\d\+]', '', phone)
         if len(cleaned) < 7 or len(cleaned) > 15:
@@ -2529,7 +2532,7 @@ async def create_request(request: GuestRequestCreate):
     
     return req_obj
 
-@api_router.get("/requests", response_model=List[GuestRequest])
+@api_router.get("/requests")
 async def get_requests(property_id: Optional[str] = None, status: Optional[str] = None):
     query = {}
     if property_id:
@@ -2619,7 +2622,7 @@ async def create_booking(booking: ExperienceBookingCreate):
     
     return booking_obj
 
-@api_router.get("/bookings", response_model=List[ExperienceBooking])
+@api_router.get("/bookings")
 async def get_bookings(property_id: Optional[str] = None, status: Optional[str] = None):
     query = {}
     if property_id:
@@ -2713,7 +2716,7 @@ async def create_order(order: FoodOrderCreate):
     
     return order_obj
 
-@api_router.get("/orders", response_model=List[FoodOrder])
+@api_router.get("/orders")
 async def get_orders(property_id: Optional[str] = None, status: Optional[str] = None):
     query = {}
     if property_id:
