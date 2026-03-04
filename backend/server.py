@@ -3872,6 +3872,17 @@ async def checkin_webhook(request: Request):
     """
     Webhook endpoint for Google Forms check-in notifications.
     Can be called from Google Apps Script when a form is submitted.
+    
+    Expected JSON payload:
+    {
+        "guest_name": "John Doe",
+        "room_number": "101",
+        "phone": "+919876543210",
+        "property_id": "varanasi",
+        "email": "john@example.com" (optional),
+        "checkin_date": "2026-03-04" (optional),
+        "checkout_date": "2026-03-07" (optional)
+    }
     """
     try:
         data = await request.json()
@@ -3879,27 +3890,45 @@ async def checkin_webhook(request: Request):
         room_number = data.get("room_number", "N/A")
         property_id = data.get("property_id", "varanasi")
         phone = data.get("phone", "")
+        email = data.get("email", "")
+        checkin_date = data.get("checkin_date", "")
+        checkout_date = data.get("checkout_date", "")
         
         # Get property settings to find manager contact
-        settings = await db.settings.find_one({"property_id": property_id})
+        settings = await db.settings.find_one({"property_id": property_id}, {"_id": 0})
         if not settings:
-            settings = await db.settings.find_one({})
+            settings = await db.settings.find_one({}, {"_id": 0})
         
-        manager_phone = settings.get("manager_whatsapp", "") if settings else ""
+        # Try multiple fields for manager phone
+        manager_phone = (
+            settings.get("staff2_whatsapp") or 
+            settings.get("manager_whatsapp") or 
+            settings.get("staff_whatsapp") or
+            (settings.get("manager_numbers", []) or [""])[0]
+        ) if settings else ""
+        
         property_name = settings.get("property_name", "Hidden Monkey Stays") if settings else "Hidden Monkey Stays"
         
         if manager_phone:
             # Send WhatsApp notification to manager
             message = f"🎉 *New Check-in Alert!*\n\n"
-            message += f"👤 Guest: {guest_name}\n"
-            message += f"🚪 Room: {room_number}\n"
+            message += f"👤 *Guest:* {guest_name}\n"
+            message += f"🚪 *Room:* {room_number}\n"
             if phone:
-                message += f"📱 Phone: {phone}\n"
-            message += f"🏨 Property: {property_name}\n"
-            message += f"⏰ Time: {datetime.now(timezone.utc).strftime('%I:%M %p, %d %b %Y')}"
+                message += f"📱 *Phone:* {phone}\n"
+            if email:
+                message += f"📧 *Email:* {email}\n"
+            if checkin_date:
+                message += f"📅 *Check-in:* {checkin_date}\n"
+            if checkout_date:
+                message += f"📅 *Check-out:* {checkout_date}\n"
+            message += f"🏨 *Property:* {property_name}\n"
+            message += f"⏰ *Time:* {datetime.now(timezone.utc).strftime('%I:%M %p, %d %b %Y')}"
             
-            await send_whatsapp_message(manager_phone, message)
+            await send_whatsapp(manager_phone, message)
             logging.info(f"Check-in notification sent for {guest_name} at {property_id}")
+        else:
+            logging.warning(f"No manager phone configured for property {property_id}")
         
         return {"success": True, "message": "Check-in recorded and manager notified"}
     except Exception as e:

@@ -63,34 +63,31 @@ export default function GuestCheckin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0D7377] to-[#14919B]">
-      {/* Header */}
+      {/* Compact Header */}
       <div className="bg-white/10 backdrop-blur-sm border-b border-white/20">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-          <img src={mascotBase64} alt="Hidden Monkey" className="w-12 h-12 object-contain" />
+        <div className="max-w-4xl mx-auto px-4 py-2 flex items-center gap-3">
+          <img src={mascotBase64} alt="Hidden Monkey" className="w-8 h-8 object-contain" />
           <div>
-            <h1 className="text-white font-bold text-xl">Guest Check-in</h1>
-            <p className="text-white/70 text-sm">Hidden Monkey Stays</p>
+            <h1 className="text-white font-semibold text-base">Guest Check-in</h1>
+            <p className="text-white/60 text-xs">Hidden Monkey Stays</p>
           </div>
         </div>
       </div>
 
       {/* Form Container */}
-      <div className="max-w-4xl mx-auto p-4">
+      <div className="max-w-4xl mx-auto p-3">
         <Card className="overflow-hidden shadow-2xl">
           <CardContent className="p-0">
-            {/* Info Banner */}
-            <div className="bg-gradient-to-r from-[#FFC107] to-[#F9A825] p-4 text-white">
-              <div className="flex items-center gap-3">
-                <ClipboardCheck className="w-8 h-8" />
-                <div>
-                  <h2 className="font-bold text-lg">Welcome! Please complete your check-in</h2>
-                  <p className="text-sm opacity-90">Fill in the form below to complete your registration</p>
-                </div>
+            {/* Slim Info Banner */}
+            <div className="bg-gradient-to-r from-[#FFC107] to-[#F9A825] px-4 py-2 text-white">
+              <div className="flex items-center gap-2">
+                <ClipboardCheck className="w-5 h-5 flex-shrink-0" />
+                <p className="font-medium text-sm">Welcome! Please complete the form below to check in.</p>
               </div>
             </div>
             
             {/* Embedded Google Form */}
-            <div className="w-full" style={{ minHeight: "80vh" }}>
+            <div className="w-full" style={{ minHeight: "85vh" }}>
               <iframe
                 src={propertyInfo.checkin_form_url}
                 width="100%"
@@ -99,7 +96,7 @@ export default function GuestCheckin() {
                 marginHeight="0"
                 marginWidth="0"
                 title="Check-in Form"
-                style={{ minHeight: "80vh" }}
+                style={{ minHeight: "85vh" }}
               >
                 Loading form...
               </iframe>
@@ -108,7 +105,7 @@ export default function GuestCheckin() {
         </Card>
 
         {/* Footer */}
-        <div className="text-center mt-6 text-white/60 text-sm">
+        <div className="text-center mt-4 text-white/60 text-xs">
           <p>Need help? Contact the front desk</p>
           {propertyInfo.contact_phone && (
             <p className="mt-1">📞 {propertyInfo.contact_phone}</p>
