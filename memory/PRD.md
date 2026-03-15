@@ -1,33 +1,34 @@
 # Hidden Monkey Guest App - PRD
 
 ## Original Problem Statement
-User deployed GuestApp on Railway at https://app.hiddenmonkeyhostels.com/ but "Things to Do", "Food to Eat" sections are not visible.
+User deployed GuestApp on Railway at https://app.hiddenmonkeyhostels.com/ but "Things to Do", "Food to Eat" sections were not visible.
 
 ## Architecture
-- **Frontend**: React SPA served via `npx serve`
-- **Backend**: FastAPI Python server
+- **Frontend**: React SPA at https://app.hiddenmonkeyhostels.com
+- **Backend**: FastAPI at https://api.hiddenmonkeyhostels.com  
 - **Database**: MongoDB
 - **Deployment**: Railway (separate services)
 
 ## Root Cause Analysis (Jan 2026)
-The frontend and backend are deployed as separate Railway services. The frontend's `REACT_APP_BACKEND_URL` environment variable is not correctly configured to point to the backend service URL, causing all API calls to fail and return HTML.
+The `things_to_do` and `food_to_try` arrays in the property-info collection were empty. The seed function doesn't auto-populate this data - it needs to be manually added via admin panel or API.
+
+## Fix Applied (Jan 2026)
+Added 5 "Things to Do" items and 5 "Food to Try" items to the Varanasi property via the `/api/property-info` POST endpoint.
 
 ## What's Been Implemented
 - Full guest portal with experiences, food menu, requests
-- Admin dashboard for property management
+- Admin dashboard for property management  
 - Staff management system
 - WhatsApp notifications via Twilio
 - Razorpay payment integration
+- Property info with things_to_do and food_to_try sections
 
-## Current Issue
-- API routes (`/api/*`) returning HTML instead of JSON
-- `things_to_do` and `food_to_try` arrays are empty because property-info API fails
-
-## Fix Required
-1. Set `REACT_APP_BACKEND_URL` in Railway frontend service to backend URL
-2. Redeploy frontend
+## Verified Working
+- ✅ Things to Do section now displays 5 activities
+- ✅ Where to Eat & What to Try section now displays 5 food recommendations
+- ✅ All flip cards working with images and descriptions
 
 ## Backlog
-- P0: Fix Railway environment configuration
-- P1: Verify API endpoints after deployment fix
-- P2: Add health check monitoring
+- P1: Add similar data for Darjeeling properties
+- P2: Allow admin to edit things_to_do/food_to_try from dashboard
+- P2: Add more seasonal recommendations
